@@ -16,32 +16,28 @@ class AuthController
         $this->user = $userModel;
     }
 
-    public function login(string $inputEmail, string $inputSenha):string
+    public function login(string $inputEmail, string $inputSenha): string
     {
         $user = $this->user->findByEmail($inputEmail);
-        if ($user === null) {
-            echo "Email ou senha não invalidos!";
-            exit;
+        if ($user === null || !password_verify($inputSenha, $user['password'])) {
+            throw new RuntimeException('E-mail ou senha invalidos.', 401);
         } else {
-            if (password_verify($inputSenha, $user['password'])) {
-                echo "Redirecionando";
-                $secretKey = $_ENV['JWT_SECRET'] ?? throw new RuntimeException('JWT_SECRTE não configurada');
 
-                $payLoad = [
-                    'iss' =>  'minha-api.com',
-                    'iat' => time(),
-                    'exp' => time() + 3600,
-                    'email' => $user['email']
-                ];
-                $token = JWT::encode(
-                    $payLoad,
-                    $secretKey,
-                    'HS256'
-                );
-                return $token;
-            } else {
-                return http_response_code(204);
-            }
+            echo "Redirecionando";
+            $secretKey = $_ENV['JWT_SECRET'] ?? throw new RuntimeException('JWT_SECRTE não configurada');
+
+            $payLoad = [
+                'iss' =>  'minha-api.com',
+                'iat' => time(),
+                'exp' => time() + 3600,
+                'email' => $user['id']
+            ];
+            $token = JWT::encode(
+                $payLoad,
+                $secretKey,
+                'HS256'
+            );
+            return $token;
         }
     }
 }
