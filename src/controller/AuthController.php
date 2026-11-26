@@ -23,7 +23,6 @@ class AuthController
             throw new RuntimeException('E-mail ou senha invalidos.', 401);
         } else {
 
-            echo "Redirecionando";
             $secretKey = $_ENV['JWT_SECRET'] ?? throw new RuntimeException('JWT_SECRTE não configurada');
 
             $payLoad = [
