@@ -5,7 +5,7 @@ use App\config\DataBase;
 use Dotenv\Dotenv;
 use App\Model\User;
 use App\Controller\AuthController;
-
+use App\services\JwtService;
 
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -13,14 +13,15 @@ header('Content-Type: application/json; charset=utf-8');
 try {
     $connection = DataBase::connect();
     $userModel = new User($connection);
+    $jwtService = new JwtService;
 
-    $userLogin = new AuthController($userModel);
+    $userLogin = new AuthController($userModel, $jwtService);
     $dados = json_decode(file_get_contents('php://input'), true);
     if (!is_array($dados) || empty($dados['email']) || empty($dados['password'])) {
         http_response_code(400);
         echo json_encode([
-            'success' => 'false',
-            'message' => 'Email e Senha obrigatórios!'
+            'success' => false,
+            'message' => 'Dados autenticados invalidos!'
         ]);
         exit;
     } else {
